@@ -1,7 +1,6 @@
 
 '''
 Todo:
-abstract out get_set() and handle_args()
 Add support for folders
 Make sure flashcards.py works in a subfolder
 add another script that handles set metadata in general especially score
@@ -44,18 +43,9 @@ def handle_args():
         filename = sys.argv[1]
 
         #determine OS dependent file system
-        if OS == "windows":
-            filename = "Swedish\\flashcards\\" + filename + ".txt"
-        elif OS == "macos":
-            filename = "Swedish/flashcards/" + filename + ".txt"
+        filename = handle_file_system(filename)
         
-        # try to open file and parse it
-        try:
-            with open(filename, "r", encoding='utf-8') as file:
-                return parse_file(file)
-        except FileNotFoundError:
-            print_exception(f"File {filename} not found.")
-            quit()
+        return rec_open_file(filename, quit)
 
     # if used as a script
     elif len(sys.argv) == 1:
@@ -87,6 +77,32 @@ def display_settings(settings):
     # loop
     return display_settings(settings)
 
+'''
+Function to return appropriate filename based off of OS
+assumes either on windows or macos
+'''
+def handle_file_system(filename):
+    # determine OS dependent file system
+    if OS == "windows":
+        filename = "Swedish\\flashcards\\" + filename + ".txt"
+    elif OS == "macos":
+        filename = "Swedish/flashcards/" + filename + ".txt"
+    return filename
+
+'''
+Function to open a file and recursively repeat an inputted function
+takes a filepath and a function
+function is what to do when filename is not found
+assumes function is valid
+'''
+def rec_open_file(filename, function):
+    try:
+        # try to open file and parse it
+        with open(filename, "r", encoding='utf-8') as file:
+            return parse_file(file)
+    except FileNotFoundError:
+        print_exception(f"File {filename} not found.")
+        return function()
 
 '''
 Function to read in the set of cards from a .txt file
@@ -98,19 +114,11 @@ def get_set():
     filename = input("Enter the set to study, do not include the .txt extension: ")
     global OS
     
-    # determine OS dependent file system
-    if OS == "windows":
-        filename = "Swedish\\flashcards\\" + filename + ".txt"
-    elif OS == "macos":
-        filename = "Swedish/flashcards/" + filename + ".txt"
-    try:
-        
-        # try to open file and parse it
-        with open(filename, "r", encoding='utf-8') as file:
-            return parse_file(file)
-    except FileNotFoundError:
-        print_exception(f"File {filename} not found.")
-        return get_set()
+    # determine appropriate filename
+    filename = handle_file_system(filename)
+
+    # open file and recursively repeat if filename not found
+    return rec_open_file(filename, get_set)
 
 '''
 Function to parse a string from the passed file
@@ -211,7 +219,7 @@ assumes ansi codes work
 def print_exception(message):
     # ansi codes to make it red and then reset color
     # avoids using external libraries
-    print("\033[31m\n" + message + "\n\033[0m]")
+    print("\033[31m\n" + message + "\n\033[0m")
 
 '''
 Function to handle all Y/N input

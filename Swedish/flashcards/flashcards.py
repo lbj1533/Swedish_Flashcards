@@ -1,10 +1,11 @@
 
 '''
 Todo:
-add handling for when an answer is wrong
+add better handling for when an answer is wrong
 Add support for folders
 Make sure flashcards.py works in a subfolder
-add another script that handles metadata in general especially score
+add another script that handles set metadata in general especially score
+add score for round
 '''
 
 import time, sys, random
@@ -31,10 +32,11 @@ returns the string of the file if it is being used as a command line tool
 '''
 def handle_args():
     if len(sys.argv) > 2:
-        print_exception("Usage: python Swedish\flashcards\flashcards.py \"filename\"")
+        print_exception("Usage: python Swedish\\flashcards\\flashcards.py \"filename\"")
         quit()
     elif len(sys.argv) == 2:
         global OS
+        filename = sys.argv[1]
         if OS == "windows":
             filename = "Swedish\\flashcards\\" + filename + ".txt"
         elif OS == "macos":
@@ -127,8 +129,14 @@ def display_cards(cards):
         attempt = input("\r" + card[term] + "\n")
         if not attempt == card[definition]:
             wrong_answers.append(card)
-            print("Correct answer: " + card[definition])
-            time.sleep(5)
+            att2 = ""
+            while att2 != card[definition]:
+                print(f"Type the correct answer: {card[definition]} ", end = "")
+                att2 = input()
+                if att2 != card[definition]:
+                    print("\033[F\033[K", end="")
+
+
         print("\033[2J")
     if len(wrong_answers) > 0: 
         print("Wrong answers:")

@@ -11,3 +11,9 @@ ett rum: room
 ny: new
 en lägenhet: apartment
 behöver: needs
+ett skrivbord: desk
+en säng: bed
+liten: small
+här: here
+ditt: your (n)
+din: your (c)

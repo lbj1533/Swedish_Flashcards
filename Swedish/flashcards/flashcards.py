@@ -1,6 +1,7 @@
 
 '''
 Todo:
+add support for color (colorama doesn't seem to work on macos, use ANSI codes)
 add handling for when an answer is wrong
 Add support for folders
 Make sure flashcards.py works in a subfolder
@@ -8,8 +9,21 @@ add another script that handles metadata in general especially score
 '''
 
 import time, sys, random
-from colorama import init, Fore
-import random
+
+OS = None
+
+'''
+Function to check the OS, was running into issues with colorama
+assumes either windows or macos
+'''
+def get_OS():
+    global OS
+    if sys.platform.startswith('win'):
+        OS = "windows"
+    else:
+        OS = "macos"
+    return OS
+
 
 '''
 Function to handle if this script is being used as a command line tool
@@ -18,10 +32,14 @@ returns the string of the file if it is being used as a command line tool
 '''
 def handle_args():
     if len(sys.argv) > 2:
-        print_exception(r"Usage: python Swedish\flashcards\flashcards.py \"filename\"")
+        print_exception("Usage: python Swedish\flashcards\flashcards.py \"filename\"")
         quit()
     elif len(sys.argv) == 2:
-        filename = "Swedish\\flashcards\\" + sys.argv[1] + ".txt"
+        global OS
+        if OS == "windows":
+            filename = "Swedish\\flashcards\\" + filename + ".txt"
+        elif OS == "macos":
+            filename = "Swedish/flashcards/" + filename + ".txt"
         try:
             with open(filename, "r", encoding='utf-8') as file:
                 return parse_file(file)
@@ -56,7 +74,11 @@ Assumptions: entire file can be read in one string object, encoding is utf-8
 '''
 def get_set():
     filename = input("Enter the set to study, do not include the .txt extension: ")
-    filename = "Swedish\\flashcards\\" + filename + ".txt"
+    global OS
+    if OS == "windows":
+        filename = "Swedish\\flashcards\\" + filename + ".txt"
+    elif OS == "macos":
+        filename = "Swedish/flashcards/" + filename + ".txt"
     try:
         with open(filename, "r", encoding='utf-8') as file:
             return parse_file(file)
@@ -131,7 +153,7 @@ Function to print exceptions
 Takes in message, returns nothing
 '''
 def print_exception(message):
-    print(Fore.RED + "\n" + message + "\n" + Fore.RESET)
+    print("\n" + message + "\n")
 
 '''
 Function to handle all Y/N input
@@ -174,13 +196,13 @@ def print_settings(message):
 Main function to run program
 '''
 def main():
-    global settings
+    global settings, Fore
     settings = [
         ["Flip term and definition", True],
         ["Shuffle cards", True]
     ]
 
-    init() #initializes colorama
+    OS = get_OS()
 
     settings = display_settings(settings)
     if not handle_args():

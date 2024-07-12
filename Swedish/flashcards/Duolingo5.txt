@@ -3,7 +3,6 @@ en bonde: farmer
 arbetar: to work
 en lärare: teacher
 en servitör: waiter
-din: your
 han: he, it
 hon: she
 en advokat: lawyer

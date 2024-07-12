@@ -1,8 +1,6 @@
 
 '''
 Todo:
-Add support for folders
-Make sure flashcards.py works in a subfolder
 add another script that handles set metadata in general especially score
 add score for round
 '''

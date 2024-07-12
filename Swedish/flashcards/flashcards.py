@@ -1,7 +1,6 @@
 
 '''
 Todo:
-add better handling for when an answer is wrong
 Add support for folders
 Make sure flashcards.py works in a subfolder
 add another script that handles set metadata in general especially score

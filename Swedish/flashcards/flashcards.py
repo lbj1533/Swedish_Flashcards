@@ -1,7 +1,6 @@
 
 '''
 Todo:
-add support for color (colorama doesn't seem to work on macos, use ANSI codes)
 add handling for when an answer is wrong
 Add support for folders
 Make sure flashcards.py works in a subfolder
@@ -153,7 +152,7 @@ Function to print exceptions
 Takes in message, returns nothing
 '''
 def print_exception(message):
-    print("\n" + message + "\n")
+    print("\033[31m\n" + message + "\n\033[0m]")
 
 '''
 Function to handle all Y/N input

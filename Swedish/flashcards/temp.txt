@@ -1,0 +1,8 @@
+läkare: doctor
+han: he
+hon: she
+mitt jobb: my job
+en ingenjör: engineer
+en bonde: farmer
+din: your
+var: where

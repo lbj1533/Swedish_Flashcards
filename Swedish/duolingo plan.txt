@@ -1,0 +1,39 @@
+Desc: provides a plan to try and make duolingo work better than it has
+
+- based off of this youtube video https://www.youtube.com/watch?v=WXHtwQP9DnQ
+
+ - 10 tips:
+ - 1st
+    - Think about what is taught in each lesson
+    - Be able to name the grammar concept being taught
+    - Supplement with a grammar text (as a reference)
+- 2nd
+    - talk to people in your language
+- 3rd
+    - translate the whole sentence, not word by word
+    - don't move on until you say it out loud first, and do so well
+- 4th
+    - do it regularly
+    - manage expectations, set goals
+- 5th
+    - take written notes
+- 6th
+    - use another memorization tool (anki, quizlet)
+- 7th
+    - get it over with (actually do other things to help)
+- 8th
+    - self test, generate your own sentences using what you've learned
+- 9th
+    - free associate, try to think of words like another word
+- 10th
+    - imagine realistic/unrealistic scenarios
+
+
+Plan:
+    - do duolingo, but translate the whole sentence as a unit, and say it out loud until you get it
+    - add new words into quizlet
+    - after the lesson, write the following:
+        - what was learned
+        - words you remember
+        - 3 sentences based off of the content
+    - memorize the words in quizlet

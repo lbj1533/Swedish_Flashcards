@@ -1,4 +1,4 @@
-# Score: 100
+# Score: 50
 en läkare: doctor
 han: he
 hon: she

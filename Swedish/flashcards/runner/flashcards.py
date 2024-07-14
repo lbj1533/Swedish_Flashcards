@@ -1,18 +1,9 @@
 '''
 Todo:
-get score working correctly
 add another script that handles set metadata in general especially score
 '''
 
-from helper import (
-    OSHandler,
-    FileHandler,
-    CardHandler,
-    PrintHandler,
-    MenuHandler,
-    MathHandler,
-    IOHandler
-)
+from helper import *
 
 def main():
     """
@@ -32,7 +23,7 @@ def main():
 
     cards = CardHandler.parse_cards(content)
     CardHandler.display_cards(cards, 0, filename, settings)
-    MenuHandler.prompt_repeat(cards)
+    MenuHandler.prompt_repeat(cards, filename, settings)
 
 # ctrl-c exception handling
 try:

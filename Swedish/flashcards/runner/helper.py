@@ -98,7 +98,7 @@ class CardHandler:
             cards.append(pair)
         return cards
     
-    def display_cards(cards, score, filename, settings):
+    def display_cards(cards, attempt_number, filename, settings):
         """
         Displays the cards for studying and handles user input.
         Recursively displays wrong answers.
@@ -121,7 +121,7 @@ class CardHandler:
                 wrong_answers.append(card)
                 att2 = ""
                 while att2 != card[definition]:
-                    print(f"Type the correct answer: {card[definition]} ", end="")
+                    print(f"Type the correct answer: {card[definition]} : ", end="")
                     att2 = input()
                     if att2 != card[definition]:
                         print("\033[F\033[K", end="")
@@ -129,8 +129,8 @@ class CardHandler:
         if len(wrong_answers) > 0: 
             print("Wrong answers:")
             time.sleep(2)
-            CardHandler.display_cards(wrong_answers, MathHandler.calc_last_score(len(wrong_answers), len(cards)), filename, settings)
-        if len(wrong_answers) == 0:
+            CardHandler.display_cards(wrong_answers, attempt_number + 1, filename, settings)
+        if attempt_number == 0:
             score = MathHandler.calc_last_score(len(wrong_answers), len(cards))
             print(f"Score: {score}%")
             IOHandler.write_last_score_to_file(score, filename)
@@ -194,14 +194,14 @@ class MenuHandler:
             print(f"Setting \"{settings[setting][0]}\" changed to {settings[setting][1]}.")
         return MenuHandler.display_settings(settings)
     
-    def prompt_repeat(cards):
+    def prompt_repeat(cards, filename, settings):
         """
         Prompts the user to repeat the last set studied.
         Repeats indefinitely until the user chooses to quit.
         """
         while True:
             repeat = IOHandler.handle_boolean_input("Repeat?")
-            CardHandler.display_cards(cards) if repeat else quit()
+            CardHandler.display_cards(cards, 0, filename, settings) if repeat else quit()
             
 class PrintHandler:
     def print_exception(message):

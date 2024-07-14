@@ -91,7 +91,8 @@ class CardHandler:
         Parses the cards from the content string.
         Returns a list of card pairs.
         """
-        content = content.split("\n")[:-1]
+        content = content.split("\n")
+        if content[-1] == "": content = content[:-1]
         cards = []
         for pair in content:
             pair = pair.split(": ")

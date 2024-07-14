@@ -1,9 +1,8 @@
-# Score: 50
-en läkare: doctor
+# Score: 86
 han: he
 hon: she
-mitt jobb: my job
-en ingenjör: engineer
-en bonde: farmer
-din: your
-var: where
+ditt kylskåp: your fridge
+ditt skrivbord: your desk
+liten: small
+stor: big
+en stad: city

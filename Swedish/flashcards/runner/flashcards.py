@@ -1,6 +1,6 @@
 '''
 Todo:
-add another script that handles set metadata in general especially score
+add average score? or rolling average?
 '''
 
 from helper import *

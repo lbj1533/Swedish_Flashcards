@@ -1,3 +1,4 @@
+# Score:
 # includes 1 and 2
 
 en kaffe: coffee

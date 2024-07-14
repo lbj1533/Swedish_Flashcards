@@ -1,3 +1,5 @@
+# Score: 
+kvinna: woman
 en läkare: doctor
 en bonde: farmer
 arbetar: to work

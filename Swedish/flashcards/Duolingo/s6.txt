@@ -1,4 +1,4 @@
-
+# Score:
 
 en tv: tv
 en bil: car
@@ -16,3 +16,14 @@ liten: small
 här: here
 ditt: your (n)
 din: your (c)
+en dator: computer
+ett kylskåp: fridge
+där: there
+vi: we
+eller hur?: right?
+en stad: city
+i centrum: downtown
+Malmö: Malmö
+hemma: at home
+Göteborg: Gothenburg
+söt: sweet

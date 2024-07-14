@@ -1,4 +1,5 @@
-läkare: doctor
+# Score: 100
+en läkare: doctor
 han: he
 hon: she
 mitt jobb: my job

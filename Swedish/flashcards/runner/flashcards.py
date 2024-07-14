@@ -1,6 +1,8 @@
 
 '''
 Todo:
+fix bug: why is parse_cards() passed content as a list instead of as a string
+have helper functions inside another file
 add another script that handles set metadata in general especially score
 add score for round
 '''
@@ -43,7 +45,7 @@ def handle_args():
         #determine OS dependent file system
         filename = handle_file_system(filename)
         
-        return rec_open_file(filename, quit)
+        return [rec_open_file(filename, quit), filename]
 
     # if used as a script
     elif len(sys.argv) == 1:
@@ -94,6 +96,7 @@ function is what to do when filename is not found
 assumes function is valid
 '''
 def rec_open_file(filename, function):
+    # ISSUE LIES IN THIS FUNCTION: RETURNS LIST INSTEAD OF STRING WHEN FILENAME IS FIRST ENTERED WRONG AND THEN RIGHT
     try:
         # try to open file and parse it
         with open(filename, "r", encoding='utf-8') as file:
@@ -116,7 +119,9 @@ def get_set():
     filename = handle_file_system(filename)
 
     # open file and recursively repeat if filename not found
-    return rec_open_file(filename, get_set)
+    content = rec_open_file(filename, get_set)
+    
+    return [content, filename]
 
 '''
 Function to parse a string from the passed file
@@ -130,8 +135,10 @@ def parse_file(file):
     # do not read blank lines or lines that start with #
     content = [line for line in lines if (line.strip() != '' and not line.strip().startswith("#"))]
     
+    content = "".join(content)
+
     # return valid lines
-    return "".join(content)
+    return content
     
 '''
 Function to parse the cards from the string read in
@@ -141,7 +148,7 @@ Assumes formatting is correct
 def parse_cards(content):
     
     # split content by lines
-    content = content.split("\n")
+    content = content.split("\n")[:-1] # [:-1] needed to avoid blank space
     cards = []
     
     # split lines into 2-lists, and add them to cards list
@@ -155,7 +162,7 @@ Function to run through the cards, displaying them for studying
 takes in cards and returns nothing
 Assumes ANSI codes will clear the screen, and that cards have length 2, and that whitespace is correct
 '''
-def display_cards(cards):
+def display_cards(cards, score, filename):
     
     #reads settings and determines term and definition
     global settings
@@ -170,10 +177,12 @@ def display_cards(cards):
     if settings[1][1]:
         random.shuffle(cards)
     wrong_answers = []
+
     
     # goes through all cards
     for card in cards:
-        attempt = input("\r" + card[term] + "\n")
+        try: attempt = input("\r" + card[term] + "\n")
+        except IndexError: print_exception("Index error: card: " + str(card))
         # if wrong
         if not attempt == card[definition]:
             wrong_answers.append(card)
@@ -194,7 +203,33 @@ def display_cards(cards):
     if len(wrong_answers) > 0: 
         print("Wrong answers:")
         time.sleep(2)
-        display_cards(wrong_answers)
+        display_cards(wrong_answers, calc_last_score(len(wrong_answers), len(cards)), filename)
+
+    # handles score
+    if len(wrong_answers) == 0:
+        score = calc_last_score(len(wrong_answers), len(cards))
+        print(f"Score: {score}%")
+        write_last_score_to_file(score, filename)
+
+'''
+Function to calculate last score from # wrong vs # total.
+'''
+def calc_last_score(num_wrong, num_total):
+    return round((num_total-num_wrong)/num_total * 100)
+
+
+
+'''
+Function to write the last score to the set file
+takes score
+'''
+def write_last_score_to_file(score, filename):
+    with open (filename, 'r') as file:
+        oc = file.readlines()[1:]
+        oc = "".join(oc)
+    with open(filename, "w") as file:
+        scoreline = f"# Score: {score}"
+        file.write(scoreline + "\n" + oc)
 
 '''
 Prompts the user to repeat the last set studied
@@ -272,7 +307,7 @@ def main():
     global settings
     settings = [
         ["Flip term and definition", True],
-        ["Shuffle cards", True]
+        ["Shuffle cards", False]
     ]
 
     # define OS here
@@ -282,14 +317,20 @@ def main():
     settings = display_settings(settings)
 
     # handle if being used in command line or not
-    if not handle_args():
-        content = get_set()
-    else:
-        content = handle_args()
+    if not handle_args(): #if not being used in command line
+        content_filename = get_set()
+        content = content_filename[0]
+        filename = content_filename[1]
+    else: # if being used in command line
+        content_filename = handle_args()
+        content = content_filename[0]
+        filename = content_filename[1]
+
+    
     
     # parse and display cards, repeat with user approval
     cards = parse_cards(content)
-    display_cards(cards)
+    display_cards(cards, 0, filename)
     prompt_repeat(cards)
 
 

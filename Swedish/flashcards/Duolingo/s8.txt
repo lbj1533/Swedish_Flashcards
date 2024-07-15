@@ -1,0 +1,5 @@
+# Score: 100
+en elefant: elephant
+björnen: the bear
+ser: see
+elefanten: the elephant

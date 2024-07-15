@@ -1,0 +1,10 @@
+# Score: 100
+aldrig: never
+tältar: go camping
+alltid: always
+med: with
+men: but
+mer: more
+städar: clean
+vi seglar aldrig men tältar alltid: we never sail but always camp
+vi seglar alltid men tältar aldrig: we always sail but never camp

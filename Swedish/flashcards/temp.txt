@@ -1,8 +1,0 @@
-# Score: 86
-han: he
-hon: she
-ditt kylskåp: your fridge
-ditt skrivbord: your desk
-liten: small
-stor: big
-en stad: city

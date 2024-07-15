@@ -1,6 +1,8 @@
 '''
 Todo:
+dotfile to manage metadata
 add average score? or rolling average?
+implement folders and get rid of directory traversal vuln
 '''
 
 from helper import *
@@ -12,7 +14,7 @@ def main():
     global settings
     settings = [
         ["Flip term and definition", True],
-        ["Shuffle cards", False]
+        ["Shuffle cards", True]
     ]
 
     OS = OSHandler.get_OS()

@@ -1,0 +1,8 @@
+# Score: 100
+han spelar ofta piano: he plays piano often
+# frequency adverb comes after verb in a main clause
+vi spelar schack tillsammans: we play chess together
+# manner adverb comes after the object in a main clause
+vi pluggar tillsammans ibland: we sometimes study together
+# manner adverb comes after verb
+# freq adverb comes after manner adverb

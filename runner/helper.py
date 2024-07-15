@@ -9,7 +9,6 @@ class OSHandler:
         Determines the operating system.
         Returns 'windows' if running on Windows, otherwise returns 'macos'.
         """
-        global OS
         if sys.platform.startswith('win'):
             OS = "windows"
         else:
@@ -52,6 +51,7 @@ class FileHandler:
         Modifies the filename based on the operating system.
         Returns the modified filename.
         """
+        OS = OSHandler.get_OS()
         if OS == "windows":
             filename = "Swedish\\flashcards\\" + filename + ".txt"
         elif OS == "macos":
@@ -217,6 +217,12 @@ class PrintHandler:
         """
         for i, setting in enumerate(message):
             print(f"{i+1}. {setting[0]} : {setting[1]}")
+
+    def print_list(list):
+        output = ""
+        for i, item in enumerate(list):
+            output += f"{i}. {item}\n"
+        print(output)
 
 class MathHandler:
 

@@ -1,6 +1,7 @@
 '''
 Todo:
-dotfile to manage metadata
+program to check if sets are formatted correctly?
+dotfile to manage metadata, would probably include a script to create sets
 add average score? or rolling average?
 implement folders and get rid of directory traversal vuln
 '''
@@ -17,7 +18,6 @@ def main():
         ["Shuffle cards", True]
     ]
 
-    OS = OSHandler.get_OS()
     settings = MenuHandler.display_settings(settings)
 
     content_filename = FileHandler.handle_args() or FileHandler.get_set()

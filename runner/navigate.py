@@ -1,17 +1,13 @@
-from pathlib import Path
+
 from helper import *
 
-def list_files(directory="."):
-    path = Path(directory)
-    files = []
-    for file in path.rglob("*"):
-        if file.is_file():
-            files.append(str(file))
-    return files
+
 
 def main():
     dir = ".\\..\\Swedish"
-    PrintHandler.print_list(list_files(dir))
+    PrintHandler.print_list(FileHandler.list_files(dir))
+    IOHandler.handle_integer_input("Choose file to study: ")
+    
 try:
     main()
 except KeyboardInterrupt:

@@ -1,4 +1,5 @@
 import sys, time, random
+from pathlib import Path
 
 class OSHandler:
     def __init__(self):
@@ -18,6 +19,19 @@ class OSHandler:
 class FileHandler:
     def __init__(self):
         pass
+
+    def list_files(directory="."):
+        """
+        Recursively list all files in the given directory.
+        Parameters: directory (str): The directory to search. Defaults to the current directory.
+        Returns: A list of file paths.
+        """
+        path = Path(directory)
+        files = []
+        for file in path.rglob("*"):
+            if file.is_file():
+                files.append(str(file))
+        return files
 
     def get_set():
         """
@@ -45,6 +59,26 @@ class FileHandler:
             return [FileHandler.rec_open_file(filename), filename]
         elif len(sys.argv) == 1:
             return False
+        
+    def convert_to_windows(filename):
+        """
+        Converts filename to use windows convention
+        """
+        return filename.replace("/","\\")
+    
+    def convert_to_macos(filename):
+        """
+        Converts filename to use macos or linux convention
+        """
+        return filename.replace("\\","/")
+    
+    def convert_to_current_OS(filename):
+        """
+        Converts filename to use current OS's filepath convention
+        """
+        OS = OSHandler.get_OS()
+        if OS == "windows": FileHandler.convert_to_windows(filename)
+        elif OS == "macos": FileHandler.convert_to_macos(filename)
         
     def handle_file_system(filename):
         """

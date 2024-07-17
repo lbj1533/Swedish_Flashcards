@@ -26,13 +26,14 @@ class FileHandler:
         Parameters: directory (str): The directory to search. Defaults to the current directory.
         Returns: A list of file paths.
         """
+        if directory is None: raise ValueError("The directory is None")
         path = Path(directory)
         files = []
         for file in path.rglob("*"):
             if file.is_file():
                 files.append(str(file))
         return files
-
+        
     def get_set():
         """
         Prompts the user to enter the set to study.
@@ -41,7 +42,7 @@ class FileHandler:
         while True:
             filename = input("Enter the set to study, do not include the .txt extension: ")
             filename = FileHandler.handle_file_system(filename)
-            content = FileHandler.rec_open_file(filename)
+            content = FileHandler.open_file(filename)
             if content:
                 return [content, filename]
     
@@ -56,7 +57,7 @@ class FileHandler:
         elif len(sys.argv) == 2:
             filename = sys.argv[1]
             filename = FileHandler.handle_file_system(filename)
-            return [FileHandler.rec_open_file(filename), filename]
+            return [FileHandler.open_file(filename), filename]
         elif len(sys.argv) == 1:
             return False
         
@@ -77,8 +78,8 @@ class FileHandler:
         Converts filename to use current OS's filepath convention
         """
         OS = OSHandler.get_OS()
-        if OS == "windows": FileHandler.convert_to_windows(filename)
-        elif OS == "macos": FileHandler.convert_to_macos(filename)
+        if OS == "windows": return FileHandler.convert_to_windows(filename)
+        elif OS == "macos": return FileHandler.convert_to_macos(filename)
         
     def handle_file_system(filename):
         """
@@ -92,9 +93,9 @@ class FileHandler:
             filename = "Swedish/flashcards/" + filename + ".txt"
         return filename
     
-    def rec_open_file(filename):
+    def open_file(filename):
         """
-        Recursively attempts to open a file until successful.
+        Attempts to open a file.
         Returns the parsed content of the file or None if not found.
         """
         try:
@@ -118,6 +119,9 @@ class FileHandler:
         content = "".join(content)
         return content
     
+    def resolve_path(filepath):
+        return str(Path(filepath).resolve())
+
 class CardHandler:
     
     def parse_cards(content):
@@ -213,7 +217,6 @@ class IOHandler:
 
 class MenuHandler:
 
-
     def display_settings(settings):
         """
         Displays and allows modification of settings.
@@ -237,7 +240,13 @@ class MenuHandler:
         while True:
             repeat = IOHandler.handle_boolean_input("Repeat?")
             CardHandler.display_cards(cards, 0, filename, settings) if repeat else quit()
-            
+
+    def choose_file(directory = "."):
+        files = FileHandler.list_files(directory)
+        PrintHandler.print_list(files)
+        selection = IOHandler.handle_integer_input("Choose file to study: ", 1, len(files)+1)
+        return files[selection-1]
+
 class PrintHandler:
     def print_exception(message):
         """
@@ -255,7 +264,7 @@ class PrintHandler:
     def print_list(list):
         output = ""
         for i, item in enumerate(list):
-            output += f"{i}. {item}\n"
+            output += f"{i+1}. {item}\n"
         print(output)
 
 class MathHandler:

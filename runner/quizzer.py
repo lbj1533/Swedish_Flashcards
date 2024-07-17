@@ -1,5 +1,6 @@
 '''
 Todo:
+settings saved in set metadata?
 program to check if sets are formatted correctly?
 dotfile to manage metadata, would probably include a script to create sets
 add average score? or rolling average?
@@ -19,9 +20,12 @@ def main():
     ]
 
     settings = MenuHandler.display_settings(settings)
+    
+    start_dir = FileHandler.convert_to_current_OS("./../Swedish/flashcards")
+    filename = MenuHandler.choose_file(start_dir)
+    content = FileHandler.open_file(filename)
 
-    content_filename = FileHandler.handle_args() or FileHandler.get_set()
-    content, filename = content_filename
+    
 
     cards = CardHandler.parse_cards(content)
     CardHandler.display_cards(cards, 0, filename, settings)

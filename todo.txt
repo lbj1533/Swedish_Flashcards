@@ -1,4 +1,8 @@
 pack chargers, devices
+mac - type c
+phone - lightning
+earbuds - type c
+
 feed bunny
 
 difference between remote control pt1 and pt2

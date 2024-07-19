@@ -1,4 +1,4 @@
-# Score: 100
+# Score: 90
 aldrig: never
 tältar: go camping
 alltid: always

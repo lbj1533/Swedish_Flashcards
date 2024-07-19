@@ -53,7 +53,7 @@ def check_types_are(objects: List[Any], expected_type: Type) -> bool:
 
     Args:
         objects (List[Any]): A list of objects to be checked.
-        expected_type (Type): The type that all objects in the list should be.
+        expected_type (Type): The type that all objects in the list should be. If None, checks if all objects are None.
 
     Returns:
         bool: returns True if all elements are of the correct type, and False if they are not
@@ -61,10 +61,14 @@ def check_types_are(objects: List[Any], expected_type: Type) -> bool:
     Raises:
         TypeError: If any object in the list is not of the specified type.
     """
-    for obj in objects:
-        if not isinstance(obj, expected_type):
-            return False
-    return True
+    if expected_type is None:
+        return all(obj is None for obj in objects) #dont listen to vscode this is needed
+    else:
+        for obj in objects:
+            if not isinstance(obj, expected_type):
+                return False
+        return True
+
 
 class File:
     def __init__(self, filepath: str) -> None:
@@ -127,7 +131,6 @@ class File:
                 f"\t.cards == {repr(self.cards)}\n"
         )
                 
-
     def _open_file(self, filename: Path) -> str | None:
         """
         Attempts to open a file and return its content.
@@ -240,22 +243,26 @@ class Runner:
                 f"\t.queue == \n{self._print_queue(self.q)}"
         )
     
-    def start(self):
+    def start(self) -> None:
         """
         Helper function to start the menu and display the cards
         """
         while True:
-            add_file = self._prompt_queue(self.q)
-            if add_file != None: self.q.put(add_file)
-            self._print_queue(self.q)
-            if not self.q.empty():
-                file = self.q.get(timeout=1)
-                print(f"Studying: set {file.basename}")
-                self._display_cards(file.cards, 0, file.filepath, self.settings)
-                self._prompt_repeat(file.cards, file.filepath, self.settings)
-            else:
+            add_files = self._prompt_queue(self.q)
+            if not check_types_are(add_files, None):
+                for add_file in add_files:
+                    self.q.put(add_file)
+                print("Sets in the queue:")
+                self._print_queue(self.q)
+
+            if self.q.empty():
                 print(f"Exiting...")
-                break;
+                break
+
+            file = self.q.get(timeout=1)
+            print(f"Studying: set {file.basename}")
+            self._display_cards(file.cards, 0, file.filepath, self.settings)
+            self._prompt_repeat(file.cards, file.filepath, self.settings)
 
     def _display_cards(self, cards:List[List[str]], attempt_number:int, filename:Path, settings:List[Tuple[str,bool]]) -> None:
         """
@@ -317,30 +324,39 @@ class Runner:
             if repeat: self._display_cards(cards, 0, filename, settings)
             else: break
 
-    def _prompt_queue(self, q:Queue[File]) -> File:
+    def _prompt_queue(self, q: Queue[File]) -> List[File]:
         """
         Prompts the user to fill to queue
 
         Args:
             q (Queue[File]): The queue of files.
+        
+        Returns:
+            set_list (List[File]): A list of files to be put into the queue.
         """
-        print("Here are the items in the Queue:")
-        self._print_queue(q)
-        if IOHandler.handle_boolean_input("Would you like to add more?"):
-            return self._choose_file()
+        set_list: List[File] = []
+        while True:
+            if not q.empty():
+                print("Here are the sets in the Queue:")
+                self._print_queue(q)
 
-    def _print_queue(self, q:Queue[File]) -> None:
+            if IOHandler.handle_boolean_input("Would you like to study another set?"):
+                set_list.append(self._choose_file())
+            else:
+                return set_list
+
+    def _print_queue(self, q: Queue[File]) -> None:
         """
         Prints each element of the queue
         """
-        if q.empty(): print("Queue is empty.")
-        else:
-            temp_list: List[File] = []
-            while not q.empty():
-                item: File = q.get()
-                temp_list.append(item)
-            for item in temp_list: print(item.basename)
-            for item in temp_list: q.put(item)
+        temp_list: List[File] = []
+        while not q.empty():
+            item: File = q.get()
+            temp_list.append(item)
+        for item in temp_list:
+            print(item.basename)
+        for item in temp_list:
+            q.put(item)
 
     def _list_files(self, directory:str) -> List[File]:
         """
@@ -371,8 +387,7 @@ class Runner:
         """
         files:List[File] = self._list_files(directory)
         self._print_list(files)
-        selection = IOHandler.handle_integer_input("Choose file to add to the queue (pick 0 to exit): ", 0, len(files)+1)
-        if selection == 0: raise NotImplementedError
+        selection = IOHandler.handle_integer_input("Choose file to add to the queue: ", 0, len(files)+1)
         return files[selection-1]
     
     def _print_list(self, any_list:List[Any]) -> None:

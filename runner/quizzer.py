@@ -1,10 +1,8 @@
 '''
 Todo:
-settings saved in set metadata?
-program to check if sets are formatted correctly?
+refactor this whoooole mf
 dotfile to manage metadata, would probably include a script to create sets
 add average score? or rolling average?
-implement folders and get rid of directory traversal vuln
 '''
 
 from helper import *

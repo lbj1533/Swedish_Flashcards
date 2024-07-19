@@ -40,3 +40,12 @@ jag ser en flodhäst: i see a hippp
 häftigt en flodhäst: cool a hippo
 Lisa har ett husdjur: lisa has a pet
 en flodhäst eller ett lejon: a hippo or a lion
+björnen är stor: the bear is big
+jag ser en björn: i see a bear
+jag tycker om björnen: i like the bear
+jag ser en elefant: i see an elephant
+du ser elefanten eller hur: you see the elephant right
+en elefant och en björn: an elephant and a bear
+björnen eller elefanten: the bear or the elephant
+en hund och en björn: a dog and a bear
+ja vi ser björnen: yes we see the bear 

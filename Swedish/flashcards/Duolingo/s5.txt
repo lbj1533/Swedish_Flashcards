@@ -1,5 +1,5 @@
-# Score: 
-kvinna: woman
+# Score: 89
+en kvinna: woman
 en läkare: doctor
 en bonde: farmer
 arbetar: to work

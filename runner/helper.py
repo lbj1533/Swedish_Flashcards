@@ -1,7 +1,8 @@
 import sys, time, random, inspect, os
 from pathlib import Path
-from typing import List, Type, Any
+from typing import List, Type, Any, Tuple
 from io import TextIOWrapper
+from queue import Queue
 
 def check_type_is(obj: Any, expected_type: Type[Any]) -> bool:
     """
@@ -46,6 +47,25 @@ def check_types_are(objs: List[Any], expected_types: List[Type[Any]]) -> bool:
             return False
     return True
 
+def check_types_are(objects: List[Any], expected_type: Type) -> bool:
+    """
+    Checks that all objects in the provided list are of the specified type.
+
+    Args:
+        objects (List[Any]): A list of objects to be checked.
+        expected_type (Type): The type that all objects in the list should be.
+
+    Returns:
+        bool: returns True if all elements are of the correct type, and False if they are not
+
+    Raises:
+        TypeError: If any object in the list is not of the specified type.
+    """
+    for obj in objects:
+        if not isinstance(obj, expected_type):
+            return False
+    return True
+
 class File:
     def __init__(self, filepath: str) -> None:
         """
@@ -70,8 +90,8 @@ class File:
         self.basename: Path = Path(self.filepath.name)
         self.parent: Path = Path(self.filepath.parent.name)
         self.subpath: Path = Path(self.parent / self.basename)
-        self.content: str = self.open_file(filepath)
-        self.cards: List[List[str]] = self.parse_cards(self.content)
+        self.content: str = self._open_file(filepath)
+        self.cards: List[List[str]] = self._parse_cards(self.content)
 
     def __str__(self) -> str:
         """
@@ -108,7 +128,7 @@ class File:
         )
                 
 
-    def open_file(self, filename: Path) -> str | None:
+    def _open_file(self, filename: Path) -> str | None:
         """
         Attempts to open a file and return its content.
 
@@ -124,7 +144,7 @@ class File:
         """
         try:
             with open(filename, "r", encoding='utf-8') as file:
-                parsed_string = self.parse_file(file)
+                parsed_string = self._parse_file(file)
                 if check_type_is(parsed_string, str):
                     return parsed_string
                 else:
@@ -133,7 +153,7 @@ class File:
             PrintHandler.print_exception(f"Error: {str(e)}")
             return None
 
-    def parse_file(self, file: TextIOWrapper) -> str:
+    def _parse_file(self, file: TextIOWrapper) -> str:
         """
         Parses the content of a file, ignoring empty lines and comments.
 
@@ -154,7 +174,7 @@ class File:
             raise TypeError("Parsed content is not a string.")
         return content
     
-    def parse_cards(self, content):
+    def _parse_cards(self, content):
         """
         Parses the cards from the content string.
 
@@ -173,10 +193,204 @@ class File:
         return cards
 
 class Runner:
-    def __init__(self, current_set:File, settings:List[List[str, bool]]) -> None:
-        self.current_set:File = current_set
-        self.settings:List[List[str, bool]] = settings
-        #make this the thing that runs the actual app
+    def __init__(self, q: Queue[File], settings: List[Tuple[str, bool]]) -> None:
+        """
+        Initializes an instance of the class with the specified file path.
+
+        Args:
+            current_set (File): The file object whose cards are to be processed.
+            settings (List[List[str, bool]]): Settings for the displaying of cards.
+
+        Attributes:
+            current_set (File): Stores the file object with the card data.
+            settings (List[Tuple[str, bool]]): Stores the settings for how cards should be displayed.
+
+        Raises:
+            ValueError: If the settings list is empty or not properly formatted.
+        """
+        self.q: Queue[File] = Queue()
+        self.settings: List[Tuple[str, bool]] = settings
+
+    def __str__(self) -> str:
+        """
+        Provides a human-readable string representation of the object.
+
+        Returns:
+            str: A formatted string that represents the object.
+        
+        Notes:
+            This method currently returns the same value as `__repr__()`.
+        """
+        return self.__repr__()
+
+    def __repr__(self) -> str:
+        """
+        Returns an unambiguous string representation of the object, useful for debugging.
+
+        Returns:
+            str: A string that represents the object with its key attributes.
+
+        Notes:
+            The string representation should ideally be a valid Python expression that could be used 
+            to recreate the object.
+        """
+       
+        return (f"{self.__class__.__name__}\n"
+                f"\t.settings == {self.settings}\n"
+                f"\t.queue == \n{self._print_queue(self.q)}"
+        )
+    
+    def start(self):
+        """
+        Helper function to start the menu and display the cards
+        """
+        while True:
+            add_file = self._prompt_queue(self.q)
+            if add_file != None: self.q.put(add_file)
+            self._print_queue(self.q)
+            if not self.q.empty():
+                file = self.q.get(timeout=1)
+                print(f"Studying: set {file.basename}")
+                self._display_cards(file.cards, 0, file.filepath, self.settings)
+                self._prompt_repeat(file.cards, file.filepath, self.settings)
+            else:
+                print(f"Exiting...")
+                break;
+
+    def _display_cards(self, cards:List[List[str]], attempt_number:int, filename:Path, settings:List[Tuple[str,bool]]) -> None:
+        """
+        Displays the cards for studying and handles user input.
+
+        Args:
+            cards (list): The list of card pairs.
+            attempt_number (int): The current attempt number.
+            filename (str): The filename of the card set.
+            settings (List[Tuple[str,bool]]): The list of settings.
+
+        Recursively displays wrong answers.
+        """
+        if settings[0][1]:
+            term = 1
+            definition = 0
+        else:
+            term = 0
+            definition = 1
+        if settings[1][1]:
+            random.shuffle(cards)
+        wrong_answers = []
+        for card in cards:
+            try:
+                attempt = input("\r" + card[term] + "\n")
+            except IndexError:
+                PrintHandler.print_exception("Index error: card: " + str(card))
+            if not attempt == card[definition]:
+                wrong_answers.append(card)
+                att2 = ""
+                while att2 != card[definition]:
+                    print(f"Type the correct answer: {card[definition]} : ", end="")
+                    att2 = input()
+                    if att2 != card[definition]:
+                        print("\033[F\033[K", end="")
+            print("\033[2J")
+        if len(wrong_answers) > 0: 
+            print("Wrong answers:")
+            time.sleep(2)
+            CardHandler.display_cards(wrong_answers, attempt_number + 1, filename, settings)
+        if attempt_number == 0:
+            score = MathHandler.calc_last_score(len(wrong_answers), len(cards))
+            print(f"Score: {score}%")
+            IOHandler.write_last_score_to_file(score, filename)
+        
+    def _prompt_repeat(self, cards:List[List[str]], filename:Path, settings:List[Tuple[str,bool]]) -> None:
+        """
+        Prompts the user to repeat the last set studied.
+
+        Args:
+            cards (list): The list of card pairs.
+            filename (str): The filename of the card set.
+            settings (list): The list of settings.
+
+        Repeats indefinitely until the user chooses to quit.
+        """
+        while True:
+            repeat = IOHandler.handle_boolean_input("Repeat set?")
+            if repeat: self._display_cards(cards, 0, filename, settings)
+            else: break
+
+    def _prompt_queue(self, q:Queue[File]) -> File:
+        """
+        Prompts the user to fill to queue
+
+        Args:
+            q (Queue[File]): The queue of files.
+        """
+        print("Here are the items in the Queue:")
+        self._print_queue(q)
+        if IOHandler.handle_boolean_input("Would you like to add more?"):
+            return self._choose_file()
+
+    def _print_queue(self, q:Queue[File]) -> None:
+        """
+        Prints each element of the queue
+        """
+        if q.empty(): print("Queue is empty.")
+        else:
+            temp_list: List[File] = []
+            while not q.empty():
+                item: File = q.get()
+                temp_list.append(item)
+            for item in temp_list: print(item.basename)
+            for item in temp_list: q.put(item)
+
+    def _list_files(self, directory:str) -> List[File]:
+        """
+        Recursively list all files in the given directory.
+
+        Args:
+            directory (str): The directory to search.
+
+        Returns:
+            list: A list of file paths.
+        """
+        path = Path(directory)
+        files = []
+        for file in path.rglob("*"):
+            if file.is_file():
+                files.append(File(file))
+        return files
+    
+    def _choose_file(self, directory:str = "Swedish/flashcards") -> File:
+        """
+        Prompts the user to choose a file to study from a directory.
+
+        Args:
+            directory (str): The directory to search for files.
+
+        Returns:
+            str: The path to the selected file.
+        """
+        files:List[File] = self._list_files(directory)
+        self._print_list(files)
+        selection = IOHandler.handle_integer_input("Choose file to add to the queue (pick 0 to exit): ", 0, len(files)+1)
+        if selection == 0: raise NotImplementedError
+        return files[selection-1]
+    
+    def _print_list(self, any_list:List[Any]) -> None:
+        """
+        Prints the items in a list with a numbered format.
+
+        Args:
+            any_list (list): The list of items to print.
+
+        Has special formatting for List[File] types
+        """
+        output = ""
+        for i, item in enumerate(any_list):
+            if check_types_are(any_list, File):
+                output += f"{i+1}. {item.basename}\n"
+            else:
+                output += f"{i+1}. {item}\n"
+        print(output)
 
 class OSHandler:
 
@@ -437,15 +651,22 @@ class IOHandler:
 
         Returns:
             bool: True for 'Y' or 'y', False for 'N' or 'n'.
+
+        Raises:
+            KeyboardInterrupt: If the user interrupts the input with Ctrl+C.
         """
-        inp = input(f"{message} [Y/N] ")
-        if inp in ["Y","y"]:
-            return True
-        elif inp in ["N","n"]:
-            return False
-        else:
-            PrintHandler.print_exception("Enter Y or N.")
-            return IOHandler.handle_boolean_input(message)
+        while True:
+            try:
+                inp = input(f"{message} [Y/N] ").strip().lower()
+                if inp in ["y", "n"]:
+                    return inp == "y"
+                else:
+                    PrintHandler.print_exception("Enter Y or N.")
+            except KeyboardInterrupt:
+                print("\nExiting...")
+                sys.exit(0)
+
+
 
     def handle_integer_input(message, lower_bound, upper_bound):
         """
@@ -524,12 +745,12 @@ class MenuHandler:
             repeat = IOHandler.handle_boolean_input("Repeat?")
             CardHandler.display_cards(cards, 0, filename, settings) if repeat else quit()
 
-    def choose_file(directory = "."):
+    def choose_file(directory):
         """
         Prompts the user to choose a file to study from a directory.
 
         Args:
-            directory (str): The directory to search for files. Defaults to the current directory.
+            directory (str): The directory to search for files.
 
         Returns:
             str: The path to the selected file.

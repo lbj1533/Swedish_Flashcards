@@ -1,3 +1,9 @@
 from helper import *
+from queue import Queue
 
-print(File("Swedish/flashcards/Duolingo/s3.txt"))
+settings = [
+        ["Flip term and definition", True],
+        ["Shuffle cards", True]
+    ]
+q = Queue()
+Runner(q, settings).start()

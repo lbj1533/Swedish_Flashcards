@@ -1,4 +1,4 @@
-# Score: 45
+# Score: 78
 en björn: a bear
 en elefant: an elephant
 björnen: the bear

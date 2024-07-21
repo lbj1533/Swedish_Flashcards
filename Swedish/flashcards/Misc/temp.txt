@@ -1,4 +1,4 @@
-# Score: 90
+# Score: 92
 aldrig: never
 tältar: go camping
 alltid: always
@@ -9,3 +9,5 @@ städar: clean
 vi seglar aldrig men tältar alltid: we never sail but always camp
 vi seglar alltid men tältar aldrig: we always sail but never camp
 behöver: need
+ett lejon: a lion
+lejonet: the lion

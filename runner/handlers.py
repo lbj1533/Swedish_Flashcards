@@ -1,6 +1,6 @@
 import sys, time, random, inspect, os
 from pathlib import Path
-from typing import List, Type, Any
+from typing import List, Type, Any, Optional
 
 
 class TypeHandler:
@@ -407,6 +407,36 @@ class IOHandler:
                 f"Enter valid input between {lower_bound} and {upper_bound-1}."
             )
             return IOHandler.handle_integer_input(message, lower_bound, upper_bound)
+
+    @staticmethod
+    def handle_choose_input(message, lower_bound, upper_bound, escape_char) -> Optional[int]:
+        """
+        Handles input where the user has to choose. 
+        Includes integer input handling, and an escape character to stop the process.
+
+        Args:
+            message (str): The message to be displayed to the user.
+            lower_bound (int): The lower bound of valid integer input. Inclusive.
+            upper_bound (int): The upper bound of valid integer input. Exclusive.
+            escape_char (str): The character to be used as an escape from choosing an item.
+        
+        Returns:
+            inp (int): The valid integer input.
+            None: If exited by escape_char
+        """
+        while True:
+            try:
+                inp = int(input(f"- {message} [{str(lower_bound)} to {str(upper_bound-1)}] [{str(escape_char)} to escape]"))
+                if lower_bound <= inp <= upper_bound - 1:
+                    return inp
+                elif inp == escape_char:
+                    return None
+                else:
+                    raise ValueError
+            except ValueError:
+                PrintHandler.print_exception(
+                    f"Enter valid input between {lower_bound} and {upper_bound-1}."
+                )
 
     @staticmethod
     def write_last_score_to_file(score, filename):

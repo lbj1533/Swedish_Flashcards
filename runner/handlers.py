@@ -368,6 +368,7 @@ class IOHandler:
 
         Raises:
             KeyboardInterrupt: If the user interrupts the input with Ctrl+C.
+            EOFError: If the user interrupts the input with Ctrl+Z on Windows or Ctrl+D on Unix-like systems.
         """
         while True:
             try:
@@ -376,9 +377,9 @@ class IOHandler:
                     return inp == "y"
                 else:
                     PrintHandler.print_exception("Enter Y or N.")
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, EOFError):
                 print("\nExiting...")
-                sys.exit(0)
+                quit()
 
     @staticmethod
     def handle_integer_input(message, lower_bound, upper_bound):
@@ -395,6 +396,8 @@ class IOHandler:
 
         Raises:
             ValueError: If the input is not within the specified range.
+            KeyboardInterrupt: If the user interrupts the input with Ctrl+C.
+            EOFError: If the user interrupts the input with Ctrl+Z on Windows or Ctrl+D on Unix-like systems.
         """
         try:
             inp = int(input(f"- {message} [{str(lower_bound)} to {str(upper_bound-1)}] "))
@@ -407,6 +410,9 @@ class IOHandler:
                 f"Enter valid input between {lower_bound} and {upper_bound-1}."
             )
             return IOHandler.handle_integer_input(message, lower_bound, upper_bound)
+        except (KeyboardInterrupt, EOFError):
+            print("\nExiting...")
+            quit()
 
     @staticmethod
     def handle_choose_input(message, lower_bound, upper_bound, escape_char) -> Optional[int]:
@@ -423,20 +429,28 @@ class IOHandler:
         Returns:
             inp (int): The valid integer input.
             None: If exited by escape_char
+
+        Raises:
+            ValueError: If the input is not within the specified range.
+            KeyboardInterrupt: If the user interrupts the input with Ctrl+C.
+            EOFError: If the user interrupts the input with Ctrl+Z on Windows or Ctrl+D on Unix-like systems.
         """
         while True:
             try:
-                inp = int(input(f"- {message} [{str(lower_bound)} to {str(upper_bound-1)}] [{str(escape_char)} to escape]"))
-                if lower_bound <= inp <= upper_bound - 1:
-                    return inp
-                elif inp == escape_char:
+                inp = input(f"- {message} [{str(lower_bound)} to {str(upper_bound-1)}] [{str(escape_char)} to escape] ")
+                if inp.lower() == escape_char.lower():
                     return None
+                elif lower_bound <= int(inp) <= upper_bound - 1:
+                    return int(inp)
                 else:
                     raise ValueError
             except ValueError:
                 PrintHandler.print_exception(
                     f"Enter valid input between {lower_bound} and {upper_bound-1}."
                 )
+            except (KeyboardInterrupt, EOFError):
+                print("\nExiting...")
+                quit()
 
     @staticmethod
     def write_last_score_to_file(score, filename):

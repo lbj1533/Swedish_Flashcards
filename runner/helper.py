@@ -1,10 +1,11 @@
 import time, random
 from pathlib import Path
-from typing import List, Any, Tuple, Optional
+from typing import List, Any, Tuple, Optional, Union
 from io import TextIOWrapper
-from queue import Queue
+from queue import Queue # for typing
 
 from handlers import *
+
 
 class File:
     def __init__(self, filepath: str) -> None:
@@ -39,11 +40,8 @@ class File:
 
         Returns:
             str: A formatted string that represents the object.
-
-        Notes:
-            This method currently returns the same value as `__repr__()`.
         """
-        return self.__repr__()
+        return self.basename()
 
     def __repr__(self) -> str:
         """
@@ -70,7 +68,9 @@ class File:
 
     def _open_file(
         self, filename: Path
-    ) -> Optional[str]:  # str | None: #needed Union[str,None] on mac, could investigate why
+    ) -> Optional[
+        str
+    ]:  # str | None: #needed Union[str,None] on mac, could investigate why
         """
         Attempts to open a file and return its content.
 
@@ -140,9 +140,110 @@ class File:
         return cards
 
 
+class Queue:
+    def __init__(self, initial_list: List[File] = []) -> None:
+        """
+        Initializes an instance of the Queue class.
+
+        Args:
+            initial_list (List[File]): An initial list of items to enter into the queue, in a FIFO fashion.
+        """
+        self.list = []
+        self._put_list(initial_list)
+
+    def __sizeof__(self) -> int:
+        """
+        Returns the size of the queue.
+
+        Returns:
+            int: The number of items in the queue.
+        """
+        return len(self.list)
+
+    def _put(self, item: File) -> None:
+        """
+        Adds an item to the end of the queue.
+
+        Args:
+            item (File): The item to be added to the queue.
+        """
+        self.list.append(item)
+
+    def _put_list(self, items: List[File]) -> None:
+        """
+        Adds multiple items to the end of the queue.
+
+        Args:
+            items (List[File]): The list of items to be added to the queue.
+        """
+        for item in items:
+            self._put(item)
+
+    def _get(self) -> File:
+        """
+        Removes and returns the item at the front of the queue.
+
+        Returns:
+            File: The item at the front of the queue.
+        """
+        return self.list.pop(0)
+
+    def _peek(self) -> File:
+        """
+        Returns the item at the front of the queue without removing it.
+
+        Returns:
+            File: The item at the front of the queue.
+        """
+        return self.list[0]
+
+    def _list(self) -> List[File]:
+        """
+        Returns all items in the queue as a list.
+
+        Returns:
+            List[File]: The list of items in the queue.
+        """
+        return self.list
+    
+    def _print(self, formatting:bool=False) -> None:
+        """
+        Prints all items in the queue as a list
+
+        Args:
+            formatting (bool) Flag for formatting the output. True to format, False to print the list. Defaults to False.
+        """
+        if formatting and not self._empty():
+            for i,item in enumerate(self.list):
+                print(f"{i+1}. {item}")
+        elif formatting and self._empty():
+            print("Queue is empty.")
+        else:
+            print(self.list)
+
+    def _copy(self) -> Queue[File]:
+        """
+        Returns a copy of the queue.
+
+        Returns:
+            Queue[File]: An identical copy of the queue
+        """
+        return Queue(self.list)
+    
+    def _empty(self) -> bool:
+        """
+        Returns whether the queue is empty or not
+
+        Returns:
+            True if empty, False if not empty
+        """
+        return self.__sizeof__() == 0
+
+
 class Runner:
     def __init__(
         self,
+        filepath:str,
         settings: List[Tuple[str, bool]] = [
             ["Flip term and definition", True],
             ["Shuffle cards", True],
@@ -163,6 +264,7 @@ class Runner:
             ValueError: If the settings list is empty or not properly formatted.
         """
         self.q: Queue[File] = Queue()
+        self.filepath = Path(filepath)
         self.settings: List[Tuple[str, bool]] = settings
 
     def __str__(self) -> str:
@@ -192,7 +294,7 @@ class Runner:
         return (
             f"{self.__class__.__name__}\n"
             f"\t.settings == {self.settings}\n"
-            f"\t.queue == \n{self._print_queue(self.q)}"
+            f"\t.queue == \n{self.q._list()}"
         )
 
     def start(self) -> None:
@@ -200,24 +302,40 @@ class Runner:
         Helper function to start the menu and display the cards
         """
         while True:
-            add_files = self._prompt_queue(self.q)
+            # get files
+            # check type
+            # put into queue
+            add_files = self._prompt_queue()
             if not TypeHandler.check_types_are(add_files, None):
                 for add_file in add_files:
-                    self.q.put(add_file)
+                    self.q._put(add_file)
+                # clear screen
+                # print sets in the queue, minus the one currently loaded
                 print("\033[2J")
                 PrintHandler.print_notice("Sets in the queue:")
-                copy_q: Queue[File] = self._copy_queue(self.q)
-                copy_q.get()
-                self._print_queue_as_list(copy_q)
+                copy_q: Queue[File] = self.q._copy()
+                copy_q._get()
+                copy_q._print(formatting=True)
 
-            if self.q.empty():
+            # if queue is empty
+            # exit
+            if self.q._empty():
                 PrintHandler.print_notice(f"Exiting...")
                 break
 
-            file = self.q.get(timeout=1)
+            # get the first file in the queue
+            # print now studying
+            # display cards
+            # ask for repeat
+            # if ctrlc, exit
+            file = self.q._get()
             PrintHandler.print_notice(f"Now Studying: {file.basename}")
-            self._display_cards(file.cards, 0, file.filepath, self.settings)
-            self._prompt_repeat(file.cards, file.filepath, self.settings)
+            try:
+                self._display_cards(file.cards, 0, file.filepath, self.settings)
+                self._prompt_repeat(file.cards, file.filepath, self.settings)
+            except KeyboardInterrupt:
+                PrintHandler.print_notice("Exiting...")
+                quit()
 
     def _display_cards(
         self,
@@ -255,7 +373,9 @@ class Runner:
                 wrong_answers.append(card)
                 att2 = ""
                 while att2 != card[definition]:
-                    PrintHandler.print_notice(f"Type the correct answer: {card[definition]} : ", end="")
+                    PrintHandler.print_notice(
+                        f"Type the correct answer: {card[definition]} : ", end=""
+                    )
                     att2 = input()
                     if att2 != card[definition]:
                         print("\033[F\033[K", end="")
@@ -291,68 +411,27 @@ class Runner:
             else:
                 break
 
-    def _prompt_queue(self, q: Queue[File]) -> List[File]:
+    def _prompt_queue(self) -> List[File]:
         """
         Prompts the user to fill to queue
-
-        Args:
-            q (Queue[File]): The queue of files.
 
         Returns:
             set_list (List[File]): A list of files to be put into the queue.
         """
         set_list: List[File] = []
         while True:
-            if not q.empty():
+            if not self.q._empty():
                 PrintHandler.print_notice("Here are the sets in the Queue:")
-                self._print_queue(q)
-
-            if IOHandler.handle_boolean_input("Would you like to study another set?"):
-                set_list.append(self._choose_file())
+                self.q._print(formatting=True)
+            set_to_add = self._choose_file()
+            if set_to_add != None:
+                set_list.append(set_to_add)
             else:
                 return set_list
 
-    def _print_queue(self, q: Queue[File]) -> None:
+    def _list_files(self) -> List[File]:
         """
-        Prints each element of the queue on new lines.
-        """
-        temp_list: List[File] = []
-        while not q.empty():
-            item: File = q.get()
-            temp_list.append(item)
-        for i,item in enumerate(temp_list):
-            print(f"{i+1}. {item.basename}")
-        for item in temp_list:
-            q.put(item)
-
-    def _print_queue_as_list(self, q: Queue[File]) -> None:
-        """
-        Prints each element of the queue as a list.
-        """
-        if q.empty():
-            PrintHandler.print_notice("Queue is empty.")
-        temp_list: List[File] = []
-        while not q.empty():
-            item: File = q.get()
-            temp_list.append(item)
-        PrintHandler.print_list([item.basename.name for item in temp_list])
-        for item in temp_list:
-            q.put(item)
-
-    def _copy_queue(self, q: Queue[File]) -> Queue[File]:
-        copy_q: Queue[File] = Queue()
-        aux_list: List[File] = []
-        while not q.empty():
-            item: File = q.get()
-            aux_list.append(item)
-        for item in aux_list:
-            q.put(item)
-            copy_q.put(item)
-        return copy_q
-
-    def _list_files(self, directory: str) -> List[File]:
-        """
-        Recursively list all files in the given directory.
+        Recursively list all files in the Runner's filepath
 
         Args:
             directory (str): The directory to search.
@@ -360,14 +439,14 @@ class Runner:
         Returns:
             list: A list of file paths.
         """
-        path = Path(directory)
+        path = self.filepath
         files = []
         for file in path.rglob("*"):
             if file.is_file():
                 files.append(File(file))
         return sorted(files, key=lambda file: file.filepath)
 
-    def _choose_file(self, directory: str = "Swedish/flashcards") -> File:
+    def _choose_file(self) -> Optional[File]:
         """
         Prompts the user to choose a file to study from a directory.
 
@@ -377,13 +456,13 @@ class Runner:
         Returns:
             str: The path to the selected file.
         """
-        files: List[File] = self._list_files(directory)
+        files: List[File] = self._list_files()
         print("\033[2J")
         self._print_list(files)
-        selection = IOHandler.handle_integer_input(
-            "Choose file to add to the queue: ", 1, len(files) + 1
+        selection = IOHandler.handle_choose_input(
+            "Choose file to add to the queue.", 1, len(files) + 1, "Q"
         )
-        return files[selection - 1]
+        return None if selection == None else files[selection - 1]
 
     def _print_list(self, any_list: List[Any]) -> None:
         """
@@ -401,4 +480,3 @@ class Runner:
             else:
                 output += f"{i+1}. {item}\n"
         print(output, end="")
-

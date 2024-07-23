@@ -1,4 +1,4 @@
-# Score: 97
+# Score: 89
 # includes 3 and 4
 
 en katt: cat

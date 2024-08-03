@@ -560,7 +560,7 @@ class PrintHandler:
             print(f"{i+1}. {setting[0]} : {setting[1]}")
 
     @staticmethod
-    def print_list(list):
+    def print_list(list_):
         """
         Prints the items in a list with a numbered format.
 
@@ -568,7 +568,7 @@ class PrintHandler:
             list (list): The list of items to print.
         """
         output = ""
-        for i, item in enumerate(list):
+        for i, item in enumerate(list_):
             output += f"{i+1}. {item}\n"
         print(output)
 

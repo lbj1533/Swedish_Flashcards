@@ -41,7 +41,7 @@ class File:
         Returns:
             str: A formatted string that represents the object.
         """
-        return self.basename()
+        return str(self.basename)
 
     def __repr__(self) -> str:
         """

@@ -9,7 +9,7 @@ jag tycker om piloten: i like the pilot
 är de i centrum: are they downtown
 ja min vär bor här: yes my friend lives here
 min vän arbetar i göteborg: my friend works in gothenburg
-ja vi är på affärsresa
-min vän bor i centrum
-talar de engelska
-behöver de hjälp
+ja vi är på affärsresa: yes we are on a business trip
+min vän bor i centrum: my friend lives downtown
+talar de engelska: speak english
+behöver de hjälp: need help

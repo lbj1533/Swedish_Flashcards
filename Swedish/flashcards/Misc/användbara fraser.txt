@@ -7,3 +7,4 @@ var bor du: where do you live
 vart går du i skola: where do you go to school
 kan jag få ett glas vatten: can i have a glass of water
 tack så mycket: thank you so much
+jag studerar utomlands här: im studying abroad here

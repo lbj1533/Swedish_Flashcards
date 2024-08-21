@@ -2,7 +2,7 @@ import time, random
 from pathlib import Path
 from typing import List, Any, Tuple, Optional, Union
 from io import TextIOWrapper
-from queue import Queue # for typing
+from queue import Queue  # for typing
 
 from handlers import *
 
@@ -205,8 +205,8 @@ class Queue:
             List[File]: The list of items in the queue.
         """
         return self.list
-    
-    def _print(self, formatting:bool=False) -> None:
+
+    def _print(self, formatting: bool = False) -> None:
         """
         Prints all items in the queue as a list
 
@@ -214,7 +214,7 @@ class Queue:
             formatting (bool) Flag for formatting the output. True to format, False to print the list. Defaults to False.
         """
         if formatting and not self._empty():
-            for i,item in enumerate(self.list):
+            for i, item in enumerate(self.list):
                 print(f"{i+1}. {item}")
         elif formatting and self._empty():
             print("Queue is empty.")
@@ -229,7 +229,7 @@ class Queue:
             Queue[File]: An identical copy of the queue
         """
         return Queue(self.list)
-    
+
     def _empty(self) -> bool:
         """
         Returns whether the queue is empty or not
@@ -243,7 +243,7 @@ class Queue:
 class Runner:
     def __init__(
         self,
-        filepath:str,
+        filepath: str,
         settings: List[Tuple[str, bool]] = [
             ["Flip term and definition", True],
             ["Shuffle cards", True],
@@ -264,7 +264,7 @@ class Runner:
             ValueError: If the settings list is empty or not properly formatted.
         """
         self.q: Queue[File] = Queue()
-        self.filepath = Path(filepath)
+        self.filepath = Path(filepath).resolve()
         self.settings: List[Tuple[str, bool]] = settings
 
     def __str__(self) -> str:
